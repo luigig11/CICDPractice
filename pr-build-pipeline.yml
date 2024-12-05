@@ -8,6 +8,8 @@ pr:
     branches:
         include:
             - main
+            - master
+            - development
 pool: 'linux-self-hosted-agent-pool'
 
 variables:
