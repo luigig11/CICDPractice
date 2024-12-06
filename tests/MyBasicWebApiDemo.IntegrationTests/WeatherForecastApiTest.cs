@@ -31,6 +31,6 @@ public class WeatherForecastApiTest : IClassFixture<WebApplicationFactory<Progra
             PropertyNameCaseInsensitive = true
         });
         weatherForecast.Should().NotBeNull();
-        weatherForecast.Should().HaveCount(8);
+        weatherForecast.Should().HaveCount(9);
     }
 }
