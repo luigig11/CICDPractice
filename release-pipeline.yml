@@ -3,17 +3,51 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- master
+trigger: none
+pr: none
 
-pool:
-  vmImage: ubuntu-latest
+pool: 'linux-self-hosted-agent-pool'
+
+variables:
+  azureSubscription: 'Azure LuisGarcia(8f4f9d1c-fb13-4476-a0d8-618443b7eeb4)'
+  webAppName: 'azure-pipeline-demo'
+  containerRegistry: 'devopscrlabluis.azurecr.io'
+  imagerepository: 'myazurepipelinesdemo'
+  tag: 'latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: AzureAppServiceSettings@1
+  displayName: Update settings
+  inputs:
+    azureSubscription: '$(azureSubscription)'
+    appName: '$(webAppName)'
+    resourceGroupName: 'devops-lab'
+    appSettings: |
+      [
+        {
+          "name": "DOCKER_REGISTRY_SERVER_URL",
+          "value": "$(containerRegistry)",
+          "slotSetting": false
+        },
+        {
+          "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+          "value": "devopscrlab",
+          "slotSetting": false
+        },
+        {
+          "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+          "value": "$(acrpassword)",
+          "slotSetting": false
+        }
+      ]
+- task: AzureRmWebAppDeployment@4
+  displayName: Deploy to Web App for Container
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: '$(azureSubscription)'
+    appType: 'webAppContainer'
+    WebAppName: '$(webAppName)'
+    DockerNamespace: 'devopscrlabluis.azurecr.io'
+    DockerRepository: 'myazurepipelinesdemo'
+    DockerImageTag: 'latest'
+    StartupCommand: 'dotnet MyBasicWebApiDemo.dll'
